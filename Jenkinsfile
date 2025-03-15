@@ -8,18 +8,21 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', git 'https://github.com/mohamedashraf001/devopsnodeapp.git'
+                echo "Checking out code from GitHub..."
+                git branch: 'main', url: 'https://github.com/mohamedashraf001/devopsnodeapp.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
+                echo "Building Docker image..."
                 sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Push Docker Image') {
             steps {
+                echo "Logging into Docker Hub and pushing the image..."
                 withDockerRegistry([credentialsId: '9f2af32e-a9a5-4e59-9a88-b6ff8d10bdec', url: '']) {
                     sh 'docker push $IMAGE_NAME'
                 }
@@ -29,26 +32,34 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
+                    echo "Checking if deployment exists..."
                     def deploymentExists = sh(script: "kubectl get deployment dockernodedepolyment --ignore-not-found -o jsonpath='{.metadata.name}'", returnStdout: true).trim()
 
                     if (!deploymentExists) {
-                        sh 'kubectl create deployment dockernodedepolyment --image=$IMAGE_NAME'
+                        echo "Creating new deployment..."
+                        sh "kubectl create deployment dockernodedepolyment --image=$IMAGE_NAME"
                     } else {
-                        sh 'kubectl set image deployment/dockernodedepolyment dockernodedepolyment=$IMAGE_NAME --record'
-                        sh 'kubectl rollout status deployment/dockernodedepolyment' // انتظر حتى يتم تحديث البودات
+                        echo "Updating existing deployment..."
+                        sh "kubectl set image deployment/dockernodedepolyment dockernodedepolyment=$IMAGE_NAME --record"
+                        sh "kubectl rollout status deployment/dockernodedepolyment"
                     }
 
+                    echo "Checking if service exists..."
                     def serviceExists = sh(script: "kubectl get service dockernodeservice --ignore-not-found -o jsonpath='{.metadata.name}'", returnStdout: true).trim()
+                    
                     if (!serviceExists) {
-                        sh 'kubectl expose deployment dockernodedepolyment --name=dockernodeservice --type=LoadBalancer --port=3000'
+                        echo "Exposing deployment as a service..."
+                        sh "kubectl expose deployment dockernodedepolyment --name=dockernodeservice --type=LoadBalancer --port=3000"
                     }
 
+                    echo "Fetching services status..."
                     sh 'kubectl get services'
                 }
             }
         }
     }
 }
+
 // pipeline {
 //     agent any
 //     stages {
