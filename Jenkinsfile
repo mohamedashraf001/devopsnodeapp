@@ -54,7 +54,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/mohamedashraf001/devopsnodeapp.git'
+                git branch: 'main', url: 'https://github.com/mohamedashraf001/devopsnodeapp.git'
             }
         }
         stage('Build') {
@@ -74,3 +74,4 @@ pipeline {
         }
     }
 }
+
