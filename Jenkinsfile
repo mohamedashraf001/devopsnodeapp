@@ -23,7 +23,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 echo "Logging into Docker Hub and pushing the image..."
-                withDockerRegistry([credentialsId: '1ab44ec4-3008-4141-aac7-32ada3869c24', url: '']) {
+                withDockerRegistry([credentialsId: '2efc87da-f6d0-4f73-b1fa-bf7a0a36bcc6', url: '']) {
                     sh 'docker push $IMAGE_NAME'
                 }
             }
