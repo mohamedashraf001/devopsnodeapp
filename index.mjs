@@ -7,7 +7,7 @@ const port = 3000;
 
 
 app.get("/", (req, res) => {
-    res.send(`Hello from 1235${os.hostname()}!`);
+    res.send(`Hello from mohamed${os.hostname()}!`);
     });
 
 app.listen(port, () => {
